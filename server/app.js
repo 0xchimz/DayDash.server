@@ -29,8 +29,7 @@ io.sockets.on('connection', function (socket) {
 		console.log(socket.id + ' join room no.' + cRoom.getRoomNo())
 
 		socket.emit('JOIN_RESPONSE', {roomInfo: cRoom.getRoomInfo()})
-
-		if(cRoom.currentPlayer === 2){
+		if(cRoom.currentPlayer === MAX_PLAYER){
 			io.sockets.in(cRoom.getRoomNo()).emit('ROOM', {})
 		}
 	})
