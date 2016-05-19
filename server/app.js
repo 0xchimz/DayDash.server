@@ -33,6 +33,17 @@ io.sockets.on('connection', function (socket) {
 			io.sockets.in(cRoom.getRoomNo()).emit('ROOM', {})
 		}
 	})
+
+	socket.on('disconnect', function() {
+		let room = socket.room
+		room.leaveRoom()
+		console.log(socket.id + ' leave room no.' + room.getRoomNo())
+		if (room.currentPlayer <= 0){
+			delete socket.room
+			cRoom = undefined
+		}
+		console.log(socket.id + ' disconnected')
+	})
 })
 
 io.listen(8000)

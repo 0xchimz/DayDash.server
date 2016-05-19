@@ -41,6 +41,13 @@ function Room(maxPlayer){
 		return info
 	}
 
+	this.leaveRoom = function(){
+		this.currentPlayer--
+		if(this.currentPlayer <= 0){
+			currentRoom--
+		}
+	}
+
 	this.joinRoom = function(){
 		if(this.isEmpty()){
 			this.currentPlayer++
