@@ -21,7 +21,7 @@ function Room(maxPlayer){
 	this.maxPlayer = maxPlayer
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
-	this.level = 1
+	this.level = 0
 	this.role = []
 	for (var k = ROLE.length - 1; k >= 0; k--) {
 		this.role.push(ROLE[k])
@@ -76,8 +76,6 @@ function Room(maxPlayer){
 				this.role.push(ROLE[j])
 			}
 		}
-		console.log(this.role)
-		console.log(ROLE)
 		return mapType[0]
 	}
 }
