@@ -6,12 +6,15 @@ var STATUS = {
 	END: 2
 }
 
-var ROLE = {
-	FINDER: 1,
-	ESCAPER: 2
-}
+var ROLE = ['FINDER', 'ESCAPER']
 
 var currentRoom = 0
+
+var levelKey = [
+	[1],
+	[1, 2],
+	[1, 2, 3]
+]
 
 function Room(maxPlayer){
 	this.roomNo = ++currentRoom
@@ -19,6 +22,7 @@ function Room(maxPlayer){
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
 	this.level = 1
+	this.role = ROLE
 
 	this.getRoomNo = function() {
 		return this.roomNo
@@ -35,7 +39,8 @@ function Room(maxPlayer){
 	this.getRoomInfo = function() {
 		let info = {
 			no: this.roomNo,
-			level: this.level,
+			currentLevel: this.level,
+			keyNo: keyRandom(),
 			status: this.status
 		}
 		return info
@@ -51,18 +56,6 @@ function Room(maxPlayer){
 	this.joinRoom = function(){
 		if(this.isEmpty()){
 			this.currentPlayer++
-
-			// Random role for player
-			// if(room.status === STATUS.IDLE){
-			// 	let role = (Math.random() > 0.5)
-			// 	users[0] = socket
-			// 	users[0].role = isFind ? ROLE.FINDER : ROLE.ESCAPER
-			// } else {
-			// 	users[1] = socket
-			// 	users[1].role = (users[0].role === ROLE.FINDER) ? ROLE.ESCAPER : ROLE.FINDER
-			// }
-
-			// let role = (users[status].role === ROLE.FINDER) ? 'finder' : 'escaper'
 		} else {
 			return false
 		}
@@ -71,4 +64,22 @@ function Room(maxPlayer){
 	this.isEmpty = function () {
 		return (this.maxPlayer > this.currentPlayer)
 	}
+
+	this.generateMap = function (){
+		let i = Math.floor(Math.random() * ROLE.length)
+		let mapType = this.role.splice(i, 1)
+		if(this.role.length === 0){
+			this.role = ROLE
+		}
+		return mapType[0]
+	}
+}
+
+function keyRandom() {
+	let tmp = []
+	for(var i = 0; i < levelKey.length; i++){
+		let map = Math.floor(Math.random() * levelKey[i].length)
+		tmp.push(levelKey[i][map])
+	}
+	return tmp
 }

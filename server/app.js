@@ -24,6 +24,7 @@ io.sockets.on('connection', function (socket) {
 		}
 
 		socket.join(cRoom.getRoomNo())
+		socket.map = cRoom.generateMap()
 		socket.room = cRoom
 		cRoom.joinRoom()
 		console.log(socket.id + ' join room no.' + cRoom.getRoomNo())
