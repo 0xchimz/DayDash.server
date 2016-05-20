@@ -6,12 +6,13 @@ var Room = require('./room')
 var MAX_PLAYER = 2
 
 var rooms = {}
-var users = []
+var users = {}
 
 var cRoom
 
 io.sockets.on('connection', function (socket) {
 	console.log(socket.id + ' connected.')
+	users[socket.id] = socket
 
 	socket.on('JOIN_ROOM', function() {
 		// Create New Room if the room is not empty or undefined.
@@ -31,7 +32,13 @@ io.sockets.on('connection', function (socket) {
 
 		socket.emit('JOIN_RESPONSE', {roomInfo: cRoom.getRoomInfo()})
 		if(cRoom.currentPlayer === MAX_PLAYER){
-			io.sockets.in(cRoom.getRoomNo()).emit('ROOM', {})
+			console.log('Room no.' + cRoom.getRoomNo() + ' game is starting.')
+			let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
+			for(let member in members){
+				let mapType = io.sockets.connected[member].map
+				io.sockets.connected[member].emit('MAP_INFO', {data: mapType})
+			}
+			io.sockets.in(cRoom.getRoomNo()).emit('START_GAME')
 		}
 	})
 
@@ -44,6 +51,7 @@ io.sockets.on('connection', function (socket) {
 			cRoom = undefined
 		}
 		console.log(socket.id + ' disconnected')
+		delete users[socket.id]
 	})
 })
 

@@ -22,7 +22,10 @@ function Room(maxPlayer){
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
 	this.level = 1
-	this.role = ROLE
+	this.role = []
+	for (var k = ROLE.length - 1; k >= 0; k--) {
+		this.role.push(ROLE[k])
+	}
 
 	this.getRoomNo = function() {
 		return this.roomNo
@@ -66,11 +69,15 @@ function Room(maxPlayer){
 	}
 
 	this.generateMap = function (){
-		let i = Math.floor(Math.random() * ROLE.length)
+		let i = Math.floor(Math.random() * this.role.length)
 		let mapType = this.role.splice(i, 1)
 		if(this.role.length === 0){
-			this.role = ROLE
+			for (var j = ROLE.length - 1; j >= 0; j--) {
+				this.role.push(ROLE[j])
+			}
 		}
+		console.log(this.role)
+		console.log(ROLE)
 		return mapType[0]
 	}
 }
