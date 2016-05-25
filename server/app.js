@@ -41,7 +41,9 @@ io.sockets.on('connection', function (client) {
 	})
 
 	client.on('FOUND_KEY', function() {
-		io.sockets.in(cRoom.getRoomNo()).emit('EVENT', {data: 'KEY_FOUND'})
+		io.sockets.in(cRoom.getRoomNo()).emit('EVENT', {
+			name: 'ENABLE_DOOR'
+		})
 	})
 
 	client.on('disconnect', function() {
