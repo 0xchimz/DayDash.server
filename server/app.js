@@ -3,7 +3,7 @@ var io = new Server()
 
 var Room = require('./room')
 
-var MAX_PLAYER = 2
+var MAX_PLAYER = 1
 
 var rooms = {}
 var users = {}
@@ -39,7 +39,12 @@ io.sockets.on('connection', function (client) {
 		if(cRoom.currentPlayer === MAX_PLAYER){
 			console.log('Room no.' + cRoom.getRoomNo() + ' game is starting.')
 			setTimeout(function () {
-				io.sockets.in(cRoom.getRoomNo()).emit('START_GAME')
+				// io.sockets.in(cRoom.getRoomNo()).emit('START_GAME')
+				let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
+				for(let member in members){
+					let itemList = io.sockets.connected[member].item
+					io.sockets.connected[member].emit('START_GAME', {data: itemList})
+				}
 			}, 5000);
 		}
 	})
