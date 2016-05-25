@@ -6,7 +6,9 @@ var STATUS = {
 	END: 2
 }
 
-var ROLE = ['FINDER', 'ESCAPER']
+// var ROLE = ['FINDER', 'ESCAPER']
+// var ROLE = ['FINDER']
+var ITEM = ['KEY']
 
 var currentRoom = 0
 
@@ -22,9 +24,9 @@ function Room(maxPlayer){
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
 	this.level = 0
-	this.role = []
-	for (var k = ROLE.length - 1; k >= 0; k--) {
-		this.role.push(ROLE[k])
+	this.item = []
+	for (var k = ITEM.length - 1; k >= 0; k--) {
+		this.item.push(ITEM[k])
 	}
 
 	this.getRoomNo = function() {
@@ -68,15 +70,20 @@ function Room(maxPlayer){
 		return (this.maxPlayer > this.currentPlayer)
 	}
 
-	this.generateMap = function (){
-		let i = Math.floor(Math.random() * this.role.length)
-		let mapType = this.role.splice(i, 1)
-		if(this.role.length === 0){
-			for (var j = ROLE.length - 1; j >= 0; j--) {
-				this.role.push(ROLE[j])
-			}
+	this.generateItem = function (){
+		let i = 0
+		let item = []
+		if(this.item.length !== 0){
+			i = Math.floor(Math.random() * this.item.length)
+			item.push(this.item.splice(i, 1)[0])
 		}
-		return mapType[0]
+		item.push('DOOR')
+		// if(this.item.length === 0){
+		// 	for (var j = ITEM.length - 1; j >= 0; j--) {
+		// 		this.item.push(ITEM[j])
+		// 	}
+		// }
+		return item
 	}
 }
 

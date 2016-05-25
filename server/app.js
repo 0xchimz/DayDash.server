@@ -3,18 +3,17 @@ var io = new Server()
 
 var Room = require('./room')
 
-var MAX_PLAYER = 2
+var MAX_PLAYER = 1
 
 var rooms = {}
 var users = {}
 
 var cRoom
 
-io.sockets.on('connection', function (socket) {
-	console.log(socket.id + ' connected.')
-	users[socket.id] = socket
+io.sockets.on('connection', function (client) {
+	console.log(client.id + ' connected.')
 
-	socket.on('JOIN_ROOM', function() {
+	client.on('JOIN_ROOM', function() {
 		// Create New Room if the room is not empty or undefined.
 		if(!cRoom){
 			console.log("cRoom is undefined.")
@@ -23,35 +22,37 @@ io.sockets.on('connection', function (socket) {
 			console.log("Room no." + cRoom.getRoomNo() + " is not empty.")
 			cRoom = new Room(MAX_PLAYER)
 		}
-
-		socket.join(cRoom.getRoomNo())
-		socket.map = cRoom.generateMap()
-		socket.room = cRoom
+		client.room = cRoom
+		client.join(cRoom.getRoomNo())
+		client.item = cRoom.generateItem()
 		cRoom.joinRoom()
-		console.log(socket.id + ' join room no.' + cRoom.getRoomNo())
+		console.log(client.id + ' join room no.' + cRoom.getRoomNo())
 
-		socket.emit('JOIN_RESPONSE', {roomInfo: cRoom.getRoomInfo()})
+		client.emit('JOIN_RESPONSE', {roomInfo: cRoom.getRoomInfo()})
 		if(cRoom.currentPlayer === MAX_PLAYER){
 			console.log('Room no.' + cRoom.getRoomNo() + ' game is starting.')
 			let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
 			for(let member in members){
-				let mapType = io.sockets.connected[member].map
-				io.sockets.connected[member].emit('MAP_INFO', {data: mapType})
+				let itemList = io.sockets.connected[member].item
+				io.sockets.connected[member].emit('GENERATE_ITEM', {data: itemList})
 			}
 			io.sockets.in(cRoom.getRoomNo()).emit('START_GAME')
 		}
 	})
 
-	socket.on('disconnect', function() {
-		let room = socket.room
-		room.leaveRoom()
-		console.log(socket.id + ' leave room no.' + room.getRoomNo())
-		if (room.currentPlayer <= 0){
-			delete socket.room
+	client.on('FOUND_KEY', function() {
+		io.sockets.in(cRoom.getRoomNo()).emit('EVENT', {data: 'KEY_FOUND'})
+	})
+
+	client.on('disconnect', function() {
+		client.room.leaveRoom()
+		console.log(client.id + ' leave room no.' + client.room.getRoomNo())
+		if (client.room.currentPlayer <= 0){
+			delete client.room
 			cRoom = undefined
 		}
-		console.log(socket.id + ' disconnected')
-		delete users[socket.id]
+		console.log(client.id + ' disconnected')
+		delete users[client.id]
 	})
 })
 
