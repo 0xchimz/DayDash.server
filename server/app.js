@@ -3,7 +3,7 @@ var io = new Server()
 
 var Room = require('./room')
 
-var MAX_PLAYER = 1
+var MAX_PLAYER = 2
 
 var rooms = {}
 var users = {}
@@ -53,6 +53,10 @@ io.sockets.on('connection', function (client) {
 		}
 	})
 
+	client.on('DEAD', function() {
+		io.sockets.in(client.room .getRoomNo()).emit('DEAD')
+	})
+
 	client.on('GAME_STATUS_READY', function() {
 		client.status = GAME_STATUS.READY
 		let _room = client.room
@@ -72,6 +76,7 @@ io.sockets.on('connection', function (client) {
 		client.status = GAME_STATUS.ON_DOOR
 		let _room = client.room
 		let nextMap = true && _room.takeKey
+		console.log('Key: ' + _room.takeKey)
 		let members = io.sockets.in(_room.getRoomNo()).adapter.rooms[_room.getRoomNo()].sockets
 		for(let member in members){
 			nextMap = (nextMap && (io.sockets.connected[member].status === GAME_STATUS.ON_DOOR))
