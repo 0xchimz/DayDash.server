@@ -8,7 +8,7 @@ var STATUS = {
 
 // var ROLE = ['FINDER', 'ESCAPER']
 // var ROLE = ['FINDER']
-var U_ITEM = ['KEY', 'MONSTER']
+var U_ITEM = ['KEY', 'MONSTERS']
 var S_ITEM = ['DOOR']
 
 var MAP = {MAX_SIZE: 128, MIN_SIZE: 64}
