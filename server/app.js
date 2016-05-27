@@ -41,17 +41,15 @@ io.sockets.on('connection', function (client) {
 		client.emit('JOIN_RESPONSE', {roomInfo: cRoom.getRoomInfo()})
 		if(cRoom.currentPlayer === MAX_PLAYER){
 			console.log('Room no.' + cRoom.getRoomNo() + ' game is starting.')
-			setTimeout(function () {
-				let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
-				for(let member in members){
-					let attr = {}
-					attr.items = io.sockets.connected[member].items
-					attr.map = io.sockets.connected[member].map
-					attr.level = io.sockets.connected[member].level
-					console.log(attr)
-					io.sockets.connected[member].emit('START_GAME', {data: attr})
-				}
-			}, 500);
+			let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
+			for(let member in members){
+				let attr = {}
+				attr.items = io.sockets.connected[member].items
+				attr.map = io.sockets.connected[member].map
+				attr.level = io.sockets.connected[member].level
+				console.log(attr)
+				io.sockets.connected[member].emit('START_GAME', {data: attr})
+			}
 		}
 	})
 
@@ -64,14 +62,16 @@ io.sockets.on('connection', function (client) {
 			play = (play && (io.sockets.connected[member].status === GAME_STATUS.READY))
 		}
 		if(play){
-			io.sockets.in(_room.getRoomNo()).emit('PLAY_GAME')
+			setTimeout(function () {
+				io.sockets.in(_room.getRoomNo()).emit('PLAY_GAME')
+			}, 5000);
 		}
 	})
 
 	client.on('PLAYER_ENTER_DOOR', function() {
 		client.status = GAME_STATUS.ON_DOOR
 		let _room = client.room
-		let nextMap = true
+		let nextMap = true && _room.takeKey
 		let members = io.sockets.in(_room.getRoomNo()).adapter.rooms[_room.getRoomNo()].sockets
 		for(let member in members){
 			nextMap = (nextMap && (io.sockets.connected[member].status === GAME_STATUS.ON_DOOR))
@@ -92,6 +92,7 @@ io.sockets.on('connection', function (client) {
 
 	client.on('FOUND_KEY', function() {
 		let _room = client.room
+		_room.takeKey = true
 		if(client.isKeyer){
 			client.emit('EVENT', {name: 'ADD_MONSTERS', num: 20})
 		} else {

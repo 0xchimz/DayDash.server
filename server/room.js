@@ -28,6 +28,7 @@ function Room(maxPlayer){
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
 	this.isKeyer = false
+	this.takeKey = false
 	this.level = 1
 	this.uitem = []
 	this.sitem = []
