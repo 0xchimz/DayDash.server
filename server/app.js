@@ -3,7 +3,7 @@ var io = new Server()
 
 var Room = require('./room')
 
-var MAX_PLAYER = 1
+var MAX_PLAYER = 2
 
 var rooms = {}
 var users = {}
@@ -13,7 +13,8 @@ var cRoom
 var GAME_STATUS = {
 	LOADING: 1,
 	READY: 2,
-	PLAYING: 3
+	PLAYING: 3,
+	ON_DOOR: 4
 }
 
 io.sockets.on('connection', function (client) {
@@ -31,6 +32,7 @@ io.sockets.on('connection', function (client) {
 		client.room = cRoom
 		client.join(cRoom.getRoomNo())
 		client.item = cRoom.generateItem()
+		client.map = cRoom.getMapProperty()
 		client.status = GAME_STATUS.LOADING
 		cRoom.joinRoom()
 		console.log(client.id + ' join room no.' + cRoom.getRoomNo())
@@ -39,21 +41,14 @@ io.sockets.on('connection', function (client) {
 		if(cRoom.currentPlayer === MAX_PLAYER){
 			console.log('Room no.' + cRoom.getRoomNo() + ' game is starting.')
 			setTimeout(function () {
-				// io.sockets.in(cRoom.getRoomNo()).emit('START_GAME')
 				let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
 				for(let member in members){
-					let itemList = io.sockets.connected[member].item
-					io.sockets.connected[member].emit('START_GAME', {data: itemList})
+					let attr = {}
+					attr.item = io.sockets.connected[member].item
+					attr.map = io.sockets.connected[member].key
+					io.sockets.connected[member].emit('START_GAME', attr)
 				}
 			}, 5000);
-		}
-	})
-
-	client.on('GET_ITEM', function() {
-		let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
-		for(let member in members){
-			let itemList = io.sockets.connected[member].item
-			io.sockets.connected[member].emit('GENERATE_ITEM', {data: itemList})
 		}
 	})
 
@@ -69,7 +64,28 @@ io.sockets.on('connection', function (client) {
 		}
 	})
 
+	client.on('PLAYER_ENTER_DOOR', function() {
+		client.status = GAME_STATUS.ON_DOOR
+		let nextMap = true
+		let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
+		for(let member in members){
+			nextMap = (nextMap && (io.sockets.connected[member].status === GAME_STATUS.ON_DOOR))
+		}
+		if(nextMap){
+			io.sockets.in(cRoom.getRoomNo()).emit('NEXT_MATCH')
+		}
+	})
+
+	client.on('PLAYER_EXIT_DOOR', function() {
+		client.status = GAME_STATUS.PLAYING
+	})
+
 	client.on('FOUND_KEY', function() {
+		if(client.isKeyer){
+			client.emit('EVENT', {name: 'ADD_MONSTERS', num: 20})
+		} else {
+			client.emit('EVENT', {name: 'ADD_MONSTERS', num: 15})
+		}
 		io.sockets.in(cRoom.getRoomNo()).emit('EVENT', {
 			name: 'ENABLE_DOOR'
 		})

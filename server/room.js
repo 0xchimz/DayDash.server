@@ -8,7 +8,10 @@ var STATUS = {
 
 // var ROLE = ['FINDER', 'ESCAPER']
 // var ROLE = ['FINDER']
-var ITEM = ['KEY']
+var U_ITEM = ['KEY', 'MONSTER']
+var S_ITEM = ['DOOR']
+
+var MAP = {MAX_SIZE: 128, MIN_SIZE: 64}
 
 var currentRoom = 0
 
@@ -23,10 +26,15 @@ function Room(maxPlayer){
 	this.maxPlayer = maxPlayer
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
+	this.isKeyer = false
 	this.level = 0
-	this.item = []
-	for (var k = ITEM.length - 1; k >= 0; k--) {
-		this.item.push(ITEM[k])
+	this.uitem = []
+	this.sitem = []
+	for (var k = U_ITEM.length - 1; k >= 0; k--) {
+		this.uitem.push(U_ITEM[k])
+	}
+	for (var k = S_ITEM.length - 1; k >= 0; k--) {
+		this.sitem.push(S_ITEM[k])
 	}
 
 	this.getRoomNo = function() {
@@ -70,19 +78,39 @@ function Room(maxPlayer){
 		return (this.maxPlayer > this.currentPlayer)
 	}
 
+	this.getMapProperty = function (){
+		let map = {
+			size: [127, 72]
+		}
+		if(this.isKeyer) {
+			map.fill = getRandomInt(50, 55)
+		} else {
+			map.fill = getRandomInt(48, 52)
+		}
+		return map
+	}
+
 	this.generateItem = function (){
 		let i = 0
 		let item = []
-		if(this.item.length !== 0){
-			i = Math.floor(Math.random() * this.item.length)
-			item.push(this.item.splice(i, 1)[0])
+		if(this.uitem.length !== 0){
+			i = Math.floor(Math.random() * this.uitem.length)
+			let tmp = this.uitem.splice(i, 1)[0]
+			if(tmp === 'KEY'){
+				this.isKeyer = true
+			} else {
+				this.isKeyer = false
+			}
+			item.push(tmp)
 		}
-		item.push('DOOR')
-		// if(this.item.length === 0){
-		// 	for (var j = ITEM.length - 1; j >= 0; j--) {
-		// 		this.item.push(ITEM[j])
-		// 	}
-		// }
+		for(let k = 0; k < this.sitem.length; k++){
+			item.push(this.sitem[i])
+		}
+		if(this.uitem.length === 0){
+			for(let k = 0; k < U_ITEM.length; k++){
+				this.uitem.push(U_ITEM[i])
+			}
+		}
 		return item
 	}
 }
@@ -94,4 +122,8 @@ function keyRandom() {
 		tmp.push(levelKey[i][map])
 	}
 	return tmp
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
