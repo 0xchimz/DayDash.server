@@ -104,7 +104,7 @@ function Room(maxPlayer){
 			item.push(tmp)
 		}
 		for(let k = 0; k < this.sitem.length; k++){
-			item.push(this.sitem[i])
+			item.push(this.sitem[k])
 		}
 		if(this.uitem.length === 0){
 			for(let k = 0; k < U_ITEM.length; k++){

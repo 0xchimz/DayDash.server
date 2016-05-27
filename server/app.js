@@ -3,7 +3,7 @@ var io = new Server()
 
 var Room = require('./room')
 
-var MAX_PLAYER = 2
+var MAX_PLAYER = 1
 
 var rooms = {}
 var users = {}
@@ -31,7 +31,7 @@ io.sockets.on('connection', function (client) {
 		}
 		client.room = cRoom
 		client.join(cRoom.getRoomNo())
-		client.item = cRoom.generateItem()
+		client.items = cRoom.generateItem()
 		client.map = cRoom.getMapProperty()
 		client.status = GAME_STATUS.LOADING
 		cRoom.joinRoom()
@@ -44,11 +44,12 @@ io.sockets.on('connection', function (client) {
 				let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
 				for(let member in members){
 					let attr = {}
-					attr.item = io.sockets.connected[member].item
-					attr.map = io.sockets.connected[member].key
-					io.sockets.connected[member].emit('START_GAME', attr)
+					attr.items = io.sockets.connected[member].items
+					attr.map = io.sockets.connected[member].map
+					console.log(attr)
+					io.sockets.connected[member].emit('START_GAME', {data: attr})
 				}
-			}, 5000);
+			}, 500);
 		}
 	})
 
