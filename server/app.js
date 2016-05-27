@@ -33,6 +33,7 @@ io.sockets.on('connection', function (client) {
 		client.join(cRoom.getRoomNo())
 		client.items = cRoom.generateItem()
 		client.map = cRoom.getMapProperty()
+		client.level = cRoom.getLevel()
 		client.status = GAME_STATUS.LOADING
 		cRoom.joinRoom()
 		console.log(client.id + ' join room no.' + cRoom.getRoomNo())
@@ -46,6 +47,7 @@ io.sockets.on('connection', function (client) {
 					let attr = {}
 					attr.items = io.sockets.connected[member].items
 					attr.map = io.sockets.connected[member].map
+					attr.level = io.sockets.connected[member].level
 					console.log(attr)
 					io.sockets.connected[member].emit('START_GAME', {data: attr})
 				}
@@ -55,25 +57,32 @@ io.sockets.on('connection', function (client) {
 
 	client.on('GAME_STATUS_READY', function() {
 		client.status = GAME_STATUS.READY
+		let _room = client.room
 		let play = true
-		let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
+		let members = io.sockets.in(_room.getRoomNo()).adapter.rooms[_room.getRoomNo()].sockets
 		for(let member in members){
 			play = (play && (io.sockets.connected[member].status === GAME_STATUS.READY))
 		}
 		if(play){
-			io.sockets.in(cRoom.getRoomNo()).emit('PLAY_GAME')
+			io.sockets.in(_room.getRoomNo()).emit('PLAY_GAME')
 		}
 	})
 
 	client.on('PLAYER_ENTER_DOOR', function() {
 		client.status = GAME_STATUS.ON_DOOR
+		let _room = client.room
 		let nextMap = true
-		let members = io.sockets.in(cRoom.getRoomNo()).adapter.rooms[cRoom.getRoomNo()].sockets
+		let members = io.sockets.in(_room.getRoomNo()).adapter.rooms[_room.getRoomNo()].sockets
 		for(let member in members){
 			nextMap = (nextMap && (io.sockets.connected[member].status === GAME_STATUS.ON_DOOR))
 		}
 		if(nextMap){
-			io.sockets.in(cRoom.getRoomNo()).emit('NEXT_MATCH')
+			_room.nextLevel()
+			client.items = _room.generateItem()
+			client.map = _room.getMapProperty()
+			client.level = _room.getLevel()
+			let attr = {items: client.items, map: client.map, level: client.level}
+			io.sockets.in(_room.getRoomNo()).emit('NEXT_MATCH', {data: attr})
 		}
 	})
 
@@ -82,12 +91,13 @@ io.sockets.on('connection', function (client) {
 	})
 
 	client.on('FOUND_KEY', function() {
+		let _room = client.room
 		if(client.isKeyer){
 			client.emit('EVENT', {name: 'ADD_MONSTERS', num: 20})
 		} else {
 			client.emit('EVENT', {name: 'ADD_MONSTERS', num: 15})
 		}
-		io.sockets.in(cRoom.getRoomNo()).emit('EVENT', {
+		io.sockets.in(_room.getRoomNo()).emit('EVENT', {
 			name: 'ENABLE_DOOR'
 		})
 	})

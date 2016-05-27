@@ -8,7 +8,8 @@ var STATUS = {
 
 // var ROLE = ['FINDER', 'ESCAPER']
 // var ROLE = ['FINDER']
-var U_ITEM = ['KEY', 'MONSTERS']
+// var U_ITEM = ['KEY', 'MONSTERS']
+var U_ITEM = ['KEY']
 var S_ITEM = ['DOOR']
 
 var MAP = {MAX_SIZE: 128, MIN_SIZE: 64}
@@ -79,13 +80,11 @@ function Room(maxPlayer){
 	}
 
 	this.getMapProperty = function (){
-		let map = {
-			size: [127, 72]
-		}
+		let map = [100, 72]
 		if(this.isKeyer) {
-			map.fill = getRandomInt(50, 55)
+			map.push = getRandomInt(50, 55)
 		} else {
-			map.fill = getRandomInt(48, 52)
+			map.push = getRandomInt(48, 52)
 		}
 		return map
 	}
