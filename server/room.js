@@ -28,7 +28,7 @@ function Room(maxPlayer){
 	this.currentPlayer = 0
 	this.status = STATUS.WAITING
 	this.isKeyer = false
-	this.level = 0
+	this.level = 1
 	this.uitem = []
 	this.sitem = []
 	for (var k = U_ITEM.length - 1; k >= 0; k--) {
@@ -82,9 +82,9 @@ function Room(maxPlayer){
 	this.getMapProperty = function (){
 		let map = [100, 72]
 		if(this.isKeyer) {
-			map.push = getRandomInt(50, 55)
+			map.push(getRandomInt(50, 55))
 		} else {
-			map.push = getRandomInt(48, 52)
+			map.push(getRandomInt(48, 52))
 		}
 		return map
 	}
