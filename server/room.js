@@ -80,7 +80,7 @@ function Room(maxPlayer){
 	}
 
 	this.getMapProperty = function (){
-		let map = [100, 72]
+		let map = []
 		if(this.isKeyer) {
 			map.push(getRandomInt(50, 55))
 		} else {
